@@ -10,7 +10,7 @@ final class ShararaSideBarController{
     this.translationEnd,
     this.backgroundBoxDecoration,
   });
-  final Color? backgroundColor;
+   Color? backgroundColor;
   final BoxDecoration? backgroundBoxDecoration;
   final Duration duration;
   final Matrix4? translationBegin,translationEnd;
@@ -36,10 +36,12 @@ class ShararaSideBarBuilder extends StatelessWidget {
   const ShararaSideBarBuilder({super.key,
    required this.sidebar,
    required this.child,
-    required this.controller
+    required this.controller,
+    this.backgroundWidget,
   });
   final ShararaSideBarController controller;
   final Widget child,sidebar;
+  final Widget? backgroundWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +63,12 @@ class ShararaSideBarBuilder extends StatelessWidget {
      required this.child,
      required this.sidebar,
      required this.directionality,
+     this.backgroundWidget
    });
    final Size size;
    final ShararaSideBarController controller;
    final Widget child,sidebar;
+   final Widget? backgroundWidget;
    final TextDirection directionality;
   @override
   State<_BuilderShararaSideBarBuilder> createState() => __BuilderShararaSideBarBuilderState();
@@ -117,18 +121,23 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
     return factor;
   }
 
+  bool startDragging = false;
    @override
    Widget build(BuildContext context) {
      return GestureDetector(
        onHorizontalDragUpdate:(d){
+         startDragging = true;
          animationController.animateTo(
            _getFactor(d.globalPosition)
          );
        },
        onHorizontalDragEnd:(d){
+         if(!startDragging)return;
+         startDragging = false;
          final double factor = _getFactor(d.globalPosition);
          if( factor > 0.5){ animationController.forward();return;}
          animationController.reverse();
+
        },
        child: Container(
          decoration:widget.controller.backgroundBoxDecoration??
@@ -140,7 +149,8 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
              builder:(BuildContext context,a){
              return Stack(
                children: [
-
+                 if(widget.backgroundWidget!=null)
+                   widget.backgroundWidget!,
                  Transform(
                   transform:sideBarMatrixAnimation.value,
                  child: Row(
