@@ -151,6 +151,8 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
                children: [
                  if(widget.backgroundWidget!=null)
                    widget.backgroundWidget!,
+
+                 if(animationController.value > 0)
                  Transform(
                   transform:sideBarMatrixAnimation.value,
                  child: Row(
