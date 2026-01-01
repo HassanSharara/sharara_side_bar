@@ -1,6 +1,6 @@
 name: sharara_side_bar
 description: "A new sharara flutter package for providing nice and easy to use side bar animation effect."
-version: 0.0.4
+version: 0.1.0
 homepage: https://github.com/HassanSharara
 repository: https://github.com/HassanSharara/sharara_side_bar
 
