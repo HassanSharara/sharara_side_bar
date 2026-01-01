@@ -47,15 +47,14 @@ class _FirstScreenState extends State<FirstScreen> {
    @override
   void initState() {
     controller = ShararaSideBarController(
-
-        backgroundColor: Colors.blue
     );
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
     return  Material(
-      child: ShararaSideBarBuilder(controller: controller,
+      child: ShararaSideBarBuilder(
+        controller: controller,
         sidebar:
         ListView(
           children: [
@@ -88,11 +87,21 @@ class _FirstScreenState extends State<FirstScreen> {
             _element(Icons.logout,"تسحيل الخروج"),
           ],
         ),
-        child:  Scaffold(
-            appBar:AppBar(
-              leading: IconButton(onPressed: controller.openDrawer, icon: const Icon(Icons.list)),
-            ),
-            body:const BasicScreen()),
+        backgroundWidget:Container(
+          decoration:BoxDecoration(
+            color:Colors.red
+          ),
+        ),
+        onAnimatedChild:(d){
+          return ClipRRect(
+            borderRadius:BorderRadius.circular(200 * d),
+            child: Scaffold(
+                appBar:AppBar(
+                  leading: IconButton(onPressed: controller.openDrawer, icon: const Icon(Icons.list)),
+                ),
+                body:const BasicScreen()),
+          );
+        },
       ),
     );
   }

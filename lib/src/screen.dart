@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 
@@ -15,7 +17,7 @@ final class ShararaSideBarController{
   final Duration duration;
   final Matrix4? translationBegin,translationEnd;
   AnimationController? animationController;
-
+  Completer<AnimationController> animationControllerCompleter = Completer();
   openDrawer({final bool toggle = true}){
     if( ! toggle  || animationController?.isForwardOrCompleted == false ) {
       animationController?.forward();
@@ -35,13 +37,20 @@ final class ShararaSideBarController{
 class ShararaSideBarBuilder extends StatelessWidget {
   const ShararaSideBarBuilder({super.key,
    required this.sidebar,
-   required this.child,
+    this.child,
     required this.controller,
     this.backgroundWidget,
-  });
+    this.onAnimatedChild,
+  }):
+   assert(
+    child!=null || onAnimatedChild != null
+   )
+  ;
   final ShararaSideBarController controller;
-  final Widget child,sidebar;
+  final Widget sidebar;
+  final Widget? child;
   final Widget? backgroundWidget;
+  final Widget Function(double)? onAnimatedChild;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +58,8 @@ class ShararaSideBarBuilder extends StatelessWidget {
     return  _BuilderShararaSideBarBuilder(size:MediaQuery.sizeOf(context),controller: controller,
       sidebar:sidebar,
       directionality:Directionality.of(context),
+      backgroundWidget:backgroundWidget,
+      onAnimatedChild:onAnimatedChild,
       child:child,
     );
   }
@@ -63,11 +74,14 @@ class ShararaSideBarBuilder extends StatelessWidget {
      required this.child,
      required this.sidebar,
      required this.directionality,
-     this.backgroundWidget
+     this.backgroundWidget,
+     this.onAnimatedChild,
    });
    final Size size;
    final ShararaSideBarController controller;
-   final Widget child,sidebar;
+   final Widget sidebar;
+   final Widget? child;
+   final Widget Function(double)? onAnimatedChild;
    final Widget? backgroundWidget;
    final TextDirection directionality;
   @override
@@ -86,6 +100,7 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
      isRight = widget.directionality == TextDirection.rtl;
      animationController = AnimationController(vsync: this,duration:widget.controller.duration);
      widget.controller.animationController = animationController;
+     widget.controller.animationControllerCompleter.complete(animationController);
      animation = CurvedAnimation(parent: animationController, curve: Curves.linear);
      matrix4Animation = Matrix4Tween(
        begin:widget.controller.translationBegin ?? Matrix4.identity(),
@@ -124,6 +139,7 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
   bool startDragging = false;
    @override
    Widget build(BuildContext context) {
+     final Size size = MediaQuery.sizeOf(context);
      return GestureDetector(
        onHorizontalDragUpdate:(d){
          startDragging = true;
@@ -142,11 +158,12 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
        child: Container(
          decoration:widget.controller.backgroundBoxDecoration??
           BoxDecoration(
-            color:widget.controller.backgroundColor
+            color:widget.controller.backgroundColor??Colors.transparent
           ),
          child: AnimatedBuilder(
              animation:animation,
              builder:(BuildContext context,a){
+               final paddingValue =  60 * animationController.value;
              return Stack(
                children: [
                  if(widget.backgroundWidget!=null)
@@ -173,15 +190,12 @@ class __BuilderShararaSideBarBuilderState extends State<_BuilderShararaSideBarBu
                      (){
                        widget.controller.closeDrawer();
                      },
-                     child: Container(
-                         clipBehavior:Clip.hardEdge,
-                       padding:EdgeInsets.all(60 * animationController.value),
-                       decoration:BoxDecoration(
-                           borderRadius:BorderRadius.circular(200 * animationController.value),
-                           color:Theme.of(context).canvasColor
-                       ),
-                       child:widget.child,
-                     ),
+                     child:
+                     widget.onAnimatedChild!=null?
+                         widget.onAnimatedChild!(animationController.value)
+                         :widget.child
+                     ,
+
                    ),
                  )
                ],
